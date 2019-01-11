@@ -20,27 +20,31 @@ router.post('/', function(req, res, next) {
     url:     'http://localhost:3000/find',
     body:    '{"email": "'+ req.body.email +'"}'},
     function(error, response, body){
-    var us = JSON.parse(body)
+    if(error != null) {
+      res.status(500).send(JSON.parse('{"error":"Connexion impossible au service User"}'))
+    } else {
+      var us = JSON.parse(body)
 
-    if(response.statusCode != 200) {
-        return res.status(response.statusCode).send(JSON.parse('{"error":"Aucun utilisateur pour ces identifiants"}'))
-    }
-    else {
-        bcrypt.compare(user.getPassword(), us.password, (err, isValid) => {
-          if (err) {
-            console.log(err)
-            return res.status(401).send(JSON.parse('{"error":"Ces identifiants sont incorrectes"}'))
-          }
-          else if (!isValid) {
-            console.log(isValid)
-            return res.status(401).send(JSON.parse('{"error":"Ces identifiants sont incorrectes"}'))
-          }
-          else {
-            var token = jwt.sign({ name: us.name, exp: Math.floor(Date.now() / 1000) + (60 * 60)}, 'secret');
-            return res.send(JSON.parse('{"token":"'+token+'"}'))
-          }
-        })   
-    }   
+      if(response.statusCode != 200) {
+          return res.status(response.statusCode).send(JSON.parse('{"error":"Aucun utilisateur pour ces identifiants"}'))
+      }
+      else {
+          bcrypt.compare(user.getPassword(), us.password, (err, isValid) => {
+            if (err) {
+              console.log(err)
+              return res.status(401).send(JSON.parse('{"error":"Ces identifiants sont incorrectes"}'))
+            }
+            else if (!isValid) {
+              console.log(isValid)
+              return res.status(401).send(JSON.parse('{"error":"Ces identifiants sont incorrectes"}'))
+            }
+            else {
+              var token = jwt.sign({ name: us.name, exp: Math.floor(Date.now() / 1000) + (60 * 60)}, 'secret');
+              return res.send(JSON.parse('{"token":"'+token+'"}'))
+            }
+          })   
+      } 
+    }  
 });
 })
 
